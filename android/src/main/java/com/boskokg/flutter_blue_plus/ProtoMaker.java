@@ -122,6 +122,9 @@ public class ProtoMaker {
     }
 
     static Protos.BluetoothService from(BluetoothDevice device, BluetoothGattService service, BluetoothGatt gatt) {
+        
+
+
         Protos.BluetoothService.Builder p = Protos.BluetoothService.newBuilder();
         p.setRemoteId(device.getAddress());
         p.setUuid(service.getUuid().toString());
@@ -129,8 +132,19 @@ public class ProtoMaker {
         for(BluetoothGattCharacteristic c : service.getCharacteristics()) {
             p.addCharacteristics(from(device, c, gatt));
         }
+
+        Log.d("FlutterBluePlugin", "total services: " + service.getIncludedServices().size());
+
         for(BluetoothGattService s : service.getIncludedServices()) {
-            p.addIncludedServices(from(device, s, gatt));
+            Log.d("FlutterBluePlugin", "new service: " + s.getUuid());
+            Log.d("FlutterBluePlugin", "self service: " + service.getUuid());
+
+            if(service.getUuid() == s.getUuid()) {
+                Log.d("FlutterBluePlugin", "skipping duplicate service: " + service.getUuid());
+            }
+            else {
+                p.addIncludedServices(from(device, s, gatt));
+            }
         }
         return p.build();
     }
